@@ -2,7 +2,6 @@ from time import sleep as time_sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.chrome.service import Service as ChromiumService
 from os import getcwd as os_getcwd
 from os import chdir as os_chdir
@@ -31,14 +30,19 @@ class WebParser:
     def __init__(self, sitemap_address: str):
         self.sitemap_address = sitemap_address
 
-    def start_parsing(self, txt_filename: str):
+    def start_parsing(self,
+                      txt_filename: str,
+                      open_tag: str="<loc>",
+                      close_tag: str="</loc>"):
         sitemap_address = self.sitemap_address
         with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
             driver.get(sitemap_address)
             pg_source = driver.page_source
             print("Количество символов в тексте страницы составило:")
             print(len(pg_source))
-            found_games_htmls = self.find_tag_values(web_page_source=pg_source)
+            found_games_htmls = self.find_tag_values(web_page_source=pg_source,
+                                                     open_tag=open_tag,
+                                                     close_tag=close_tag)
             print(*found_games_htmls, sep='\n')
             self.write_list_to_txt_file(lst=found_games_htmls,
                                         filename=txt_filename)
