@@ -1,4 +1,8 @@
 {
   "htmls_txt_filename": "..\\output\\bg_htmls.txt",
-  "sitemap_1": "https://hobbyworld.ru/sitemap.xml"
+  "sitemap_1": "https://hobbyworld.ru/sitemap.xml",
+  "exclude_marks_webpages_1": [
+        "/news/",
+        "-blog-"
+    ]
 }
