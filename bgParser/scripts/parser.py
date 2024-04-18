@@ -16,16 +16,19 @@ from selenium.common.exceptions import TimeoutException, ElementClickIntercepted
 from tqdm.notebook import tqdm
 
 
-# подгружаем json с данными
-with open("..\\resources\\dict.json") as json_file:
-    json_data = json_load(json_file)
-
-
 class WebParser:
+    """
+    __names_dict_path - путь к файлу с наименованиями файлов, путями и проч информацией...
+    """
+    __names_dict_path = "..\\resources\\dict.json"
 
     def __init__(self, sitemap_address: str, exclude_marks_web_pages: list):
         self.sitemap_address = sitemap_address
         self.exclude_marks_web_pages = exclude_marks_web_pages
+
+    @classmethod
+    def get_names_dict_path(cls):
+        return cls.__names_dict_path
 
     def start_parsing(self,
                       txt_filename: str,
@@ -61,7 +64,12 @@ class WebParser:
         file_format = ".txt"
         if type(filename) != str or not filename.endswith(file_format):
             raise TypeError("Передан неверный аргумент имени файла!")
-        with open(filename, 'w') as f:
+        filename_new = "_".join([
+            filename.split(file_format)[0],
+            self.get_now_timestamp(),
+            file_format
+        ])
+        with open(filename_new, 'w') as f:
             for line in lst:
                 f.write(f"{line}\n")
 
@@ -69,11 +77,15 @@ class WebParser:
         if type(underspaces) != bool:
             raise TypeError("Передан неверный аргумент!")
         now = datetime.now()
+
         time = now.strftime("%d:%m:%Y:%H:%M")
         return [time, time.replace(":", "_")][underspaces]
 
 
 if __name__ == '__main__':
+    # подгружаем json с данными
+    with open(WebParser.get_names_dict_path()) as json_file:
+        json_data = json_load(json_file)
     print(type(json_data))
     print(json_data)
     parser_1 = WebParser(sitemap_address=json_data['sitemap_1'],
