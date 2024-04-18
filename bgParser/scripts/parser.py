@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.service import Service as ChromiumService
 from os import getcwd as os_getcwd
 from os import chdir as os_chdir
 from json import load as json_load
+from json import dump as json_dump
 from re import findall as re_findall
 
 from datetime import datetime
@@ -21,6 +22,7 @@ class WebParser:
     __names_dict_path - путь к файлу с наименованиями файлов, путями и проч информацией...
     """
     __names_dict_path = "..\\resources\\dict.json"
+    __last_downloaded_htmls_key = "last_downloaded_htmls"
 
     def __init__(self, sitemap_address: str, exclude_marks_web_pages: list):
         self.sitemap_address = sitemap_address
@@ -29,6 +31,10 @@ class WebParser:
     @classmethod
     def get_names_dict_path(cls):
         return cls.__names_dict_path
+
+    @classmethod
+    def get_last_downloaded_htmls_key(cls):
+        return cls.__last_downloaded_htmls_key
 
     def start_parsing(self,
                       txt_filename: str,
@@ -72,6 +78,7 @@ class WebParser:
         with open(filename_new, 'w') as f:
             for line in lst:
                 f.write(f"{line}\n")
+        self.update_info_dict(value=filename_new)
 
     def get_now_timestamp(self, underspaces: bool=True):
         if type(underspaces) != bool:
@@ -80,6 +87,18 @@ class WebParser:
 
         time = now.strftime("%d:%m:%Y:%H:%M")
         return [time, time.replace(":", "_")][underspaces]
+
+    def update_info_dict(self, value, append_to_lst=False):
+        dict_path = self.get_names_dict_path()
+        key_ldf = self.get_last_downloaded_htmls_key()
+        with open(dict_path) as json_file:
+            json_data: dict = json_load(json_file)
+        if append_to_lst:
+            pass
+        else:
+            json_data[key_ldf] = value
+        with open(dict_path, "w") as jsonFile:
+            json_dump(json_data, jsonFile)
 
 
 if __name__ == '__main__':
