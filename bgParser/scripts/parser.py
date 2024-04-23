@@ -107,6 +107,6 @@ if __name__ == '__main__':
         json_data = json_load(json_file)
     print(type(json_data))
     print(json_data)
-    parser_1 = WebParser(sitemap_address=json_data['sitemap_1'],
-                         exclude_marks_web_pages=json_data["exclude_marks_webpages_1"])
+    parser_1 = WebParser(sitemap_address=json_data['sitemap'],
+                         exclude_marks_web_pages=json_data["exclude_marks_webpages"])
     parser_1.start_parsing(txt_filename=json_data['htmls_txt_filename'])
