@@ -9,8 +9,8 @@
     "bg_complect": [".complect .lists ul ul", 0],
     "bg_about": [".left-content section div", 0],
     "bg_price": [".right-content section div span", 0],
-    "href_to_original": [".labels-big a", 1],
+    "href_original_bg": [".labels-big a[href^='https://']", 1],
     "href_rules": [".rules .document a[href$='.pdf']", 1],
-    "bg_tags": [".tags p", 1],
-    "bg_page_content": ["html", 0]
+    "bg_tags": [".tags p", 0],
+    "href_tags": [".tags p a[href^='https://']", 1]
 }

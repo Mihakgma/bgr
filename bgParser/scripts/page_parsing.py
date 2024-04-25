@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, \
-    ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -49,16 +48,24 @@ def get_element_attribute(driver,
     found_element = driver.find_element(By.CSS_SELECTOR, css_selector)
     found_elem_text = found_element.text
     if get_href:
-        print(f'Найденный Вэб-Элемент с именем <{found_element}>')
-        found_href = found_element.get_attribute('href')
-        if found_href is not None:
-            return found_href
         try:
-            return [i.get_attribute('href') for i in found_element]
+            found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+            return ", ".join([i.get_attribute('href') for i in found_elements])
         except BaseException as e:
             print(f'Возникла ошибка <{e}>')
-            print('По всей видимости данный элемент - не итерируемый!')
-    return found_elem_text
+            return ""
+        # print(f'Найденный Вэб-Элемент с именем <{found_element}>')
+        # found_href = found_element.get_attribute('href')
+        # if found_href is not None:
+        #     return found_href
+        # try:
+        #     found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+        #     return [i.get_attribute('href') for i in found_elements]
+        # except BaseException as e:
+        #     print(f'Возникла ошибка <{e}>')
+        #     print('По всей видимости данный элемент - не итерируемый!')
+        #     return ""
+    return found_elem_text.replace("\n", ", ")
 
 
 def get_bg_content(driver, css_selector_info: dict):
@@ -72,16 +79,17 @@ def get_bg_content(driver, css_selector_info: dict):
 
 
 if __name__ == '__main__':
-    # подгружаем json с данными
+    # подгружаем json с данными о CSS-Selectors
     css_selector_filename = "..\\resources\\bg_parsing_info.json"
     with open(css_selector_filename) as json_file:
         json_data = json_load(json_file)
     print(type(json_data))
-    print(json_data)
+    # print(json_data)
 
     start_html = "https://hobbyworld.ru/kragmorta"
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
         driver.get(start_html)
         result = get_bg_content(driver=driver, css_selector_info=json_data)
-        # смотрим полученный результат
-        print(*[(k, v) for (k, v) in result.items()], sep="\n")
+    # Selenium-browser has been closed
+    # смотрим полученный результат
+    print(*[(k, v) for (k, v) in result.items()], sep="\n")
