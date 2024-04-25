@@ -7,7 +7,7 @@
     "bg_brand": [".product-resume .manufacturer p span", 0],
     "bg_range": [".product-resume .range p", 0],
     "bg_complect": [".complect .lists ul ul", 0],
-    "bg_about": [".left-content section div", 0],
+    "bg_about": [".left-content section div[class^='about']", 0],
     "bg_price": [".right-content section div span", 0],
     "href_original_bg": [".labels-big a[href^='https://']", 1],
     "href_rules": [".rules .document a[href$='.pdf']", 1],
