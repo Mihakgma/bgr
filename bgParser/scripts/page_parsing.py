@@ -9,6 +9,14 @@ from selenium.webdriver.chrome.service import Service as ChromiumService
 from json import load as json_load
 
 
+def refine_str(text: str, seps: str=', '):
+    text = text.strip()
+    tmp_lst = [seps+text[i] if i > 0 and text[i-1] != " " and text[i].isupper()
+               else text[i]
+               for i in range(len(text))]
+    return "".join(tmp_lst)
+
+
 def get_element_attribute(driver,
                      css_selector: str,
                      get_href: int = 0,
@@ -28,7 +36,8 @@ def get_element_attribute(driver,
         except BaseException as e:
             print(f'Возникла ошибка <{e}>')
             return ""
-    return found_elem_text.replace("\n", ", ")
+    return refine_str(found_elem_text)
+    # return found_elem_text.replace("\n", ", ")
 
 
 def get_bg_content(driver, css_selector_info: dict):

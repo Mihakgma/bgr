@@ -1,27 +1,27 @@
-from time import sleep as time_sleep
+# from time import sleep as time_sleep
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromiumService
-from os import getcwd as os_getcwd
-from os import chdir as os_chdir
+# from os import getcwd as os_getcwd
+# from os import chdir as os_chdir
 from json import load as json_load
 from json import dump as json_dump
 from re import findall as re_findall
 
 from datetime import datetime
 
-from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, \
-    ElementNotInteractableException, StaleElementReferenceException
-
-from tqdm.notebook import tqdm
+# from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, \
+#     ElementNotInteractableException, StaleElementReferenceException
+#
+# from tqdm.notebook import tqdm
 
 
 class WebParser:
     """
     __names_dict_path - путь к файлу с наименованиями файлов, путями и проч информацией...
     """
-    __names_dict_path = "..\\resources\\dict.json"
+    __names_dict_path = "..\\resources\\names_info.json"
     __last_downloaded_htmls_key = "last_downloaded_htmls"
 
     def __init__(self, sitemap_address: str, exclude_marks_web_pages: list):
