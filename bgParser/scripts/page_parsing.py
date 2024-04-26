@@ -7,6 +7,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromiumService
 
 from json import load as json_load
+from json import dump as json_dump
+
+from tqdm.notebook import tqdm
 
 
 def get_elements_attribute(driver,
@@ -23,7 +26,10 @@ def get_elements_attribute(driver,
 
 def refine_str(text: str, seps: str=', '):
     text = text.strip()
-    tmp_lst = [seps+text[i] if i > 0 and text[i-1] != " " and text[i].isupper()
+    tmp_lst = [seps+text[i] if i > 0 and
+               text[i-1] != " " and
+               text[i].isupper() and
+               not text[i-1].isupper()
                else text[i]
                for i in range(len(text))]
     return "".join(tmp_lst)
@@ -35,7 +41,7 @@ def parse_value(driver,
                 separator: str = ", ",
                 need_replace_newline: int = 0,
                 timeout: int = 3):
-    print(css_selector)
+    # print(css_selector)
     try:
         element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         WebDriverWait(driver, timeout).until(element_present)
@@ -63,15 +69,36 @@ def parse_value(driver,
     return refine_str(found_elem_text)
 
 
-def get_bg_content(driver, css_selector_info: dict):
+def get_bg_content(driver,
+                   url: str,
+                   css_selector_info: dict,
+                   result_dict: dict):
+    if type(url) != str and not url.startswith("https://"):
+        raise ValueError("Неверный тип переданного аргумента <url>!")
+    if type(result_dict) != dict:
+        raise ValueError("Неверный тип переданного аргумента <result_dict>!")
     if type(css_selector_info) != dict:
         raise ValueError("Неверный тип переданного аргумента <css_selector_info>!")
-    [v.append(parse_value(driver=driver,
-                          css_selector=v[0],
-                          source_type=v[1],
-                          need_replace_newline=v[2]))
-     for (k,v) in css_selector_info.items()]
-    return css_selector_info
+
+    # url = driver.current_url
+    if url not in result_dict:
+        result_dict[url] = {}
+        try:
+            for (k, v) in css_selector_info.items():
+                curr_value = parse_value(driver=driver,
+                                         css_selector=v[0],
+                                         source_type=v[1],
+                                         need_replace_newline=v[2])
+                result_dict[url][k] = curr_value
+            result_dict[url]["parsed_ok"] = 1
+            result_dict[url]["duplicates"] = 0
+            result_dict[url]["error"] = ""
+        except BaseException as e:
+            error_txt = f"{k}_{v}_{e}"
+            result_dict[url]["error"] = error_txt
+    elif url in result_dict:
+        result_dict[url]["duplicates"] += 1
+    return result_dict
 
 
 if __name__ == '__main__':
@@ -82,11 +109,28 @@ if __name__ == '__main__':
     print(type(json_data))
     # print(json_data)
 
-    start_html = "https://hobbyworld.ru/kragmorta"
+    # start_html = "https://hobbyworld.ru/kragmorta"
     # start_html = "https://hobbyworld.ru/catan-kupci-i-varvari"
+    start_htmls = [
+        "https://hobbyworld.ru/kragmorta",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari"
+    ]
+    test_dict = {}
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
-        driver.get(start_html)
-        result = get_bg_content(driver=driver, css_selector_info=json_data)
+        for html in tqdm(start_htmls):
+            if html not in test_dict:
+                driver.get(html)
+            test_dict = get_bg_content(driver=driver,
+                                    url=html,
+                                    css_selector_info=json_data,
+                                    result_dict=test_dict)
     # Selenium-browser has been closed
     # смотрим полученный результат
-    print(*[(k, v) for (k, v) in result.items()], sep="\n")
+    print(*[(k, *[(col, val) for (col, val) in v.items()])
+            for (k, v) in test_dict.items()], sep="\n")
+
+    res_dict_path = "..\\output\\test_parsed_pages.json"
+    with open(res_dict_path, "w") as jsonFile:
+        json_dump(test_dict, jsonFile)
