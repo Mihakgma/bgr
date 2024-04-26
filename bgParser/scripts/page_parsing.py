@@ -9,6 +9,18 @@ from selenium.webdriver.chrome.service import Service as ChromiumService
 from json import load as json_load
 
 
+def get_elements_attribute(driver,
+                           css_selector,
+                           attr_name: str,
+                           separator: str):
+    try:
+        found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+        return separator.join([i.get_attribute(attr_name) for i in found_elements])
+    except BaseException as e:
+        print(f'Возникла ошибка <{e}>')
+        return ""
+
+
 def refine_str(text: str, seps: str=', '):
     text = text.strip()
     tmp_lst = [seps+text[i] if i > 0 and text[i-1] != " " and text[i].isupper()
@@ -17,11 +29,11 @@ def refine_str(text: str, seps: str=', '):
     return "".join(tmp_lst)
 
 
-def get_element_attribute(driver,
-                          css_selector: str,
-                          source_type: int = 0,
-                          separator: str = ", ",
-                          timeout: int = 3):
+def parse_value(driver,
+                css_selector: str,
+                source_type: int = 0,
+                separator: str = ", ",
+                timeout: int = 3):
     print(css_selector)
     try:
         element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
@@ -32,19 +44,17 @@ def get_element_attribute(driver,
 
     found_element = driver.find_element(By.CSS_SELECTOR, css_selector)
     if source_type == 1:  # get_attribute('href')
-        try:
-            found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
-            return separator.join([i.get_attribute('href') for i in found_elements])
-        except BaseException as e:
-            print(f'Возникла ошибка <{e}>')
-            return ""
+        res = get_elements_attribute(driver=driver,
+                                     css_selector=css_selector,
+                                     attr_name='href',
+                                     separator=separator)
+        return res
     elif source_type == 2:  # get_attribute('src')
-        try:
-            found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
-            return separator.join([i.get_attribute('src') for i in found_elements])
-        except BaseException as e:
-            print(f'Возникла ошибка <{e}>')
-            return ""
+        res = get_elements_attribute(driver=driver,
+                                     css_selector=css_selector,
+                                     attr_name='src',
+                                     separator=separator)
+        return res
 
     found_elem_text = found_element.text
     return refine_str(found_elem_text)
@@ -54,9 +64,9 @@ def get_element_attribute(driver,
 def get_bg_content(driver, css_selector_info: dict):
     if type(css_selector_info) != dict:
         raise ValueError("Неверный тип переданного аргумента <css_selector_info>!")
-    [v.append(get_element_attribute(driver=driver,
-                                    css_selector=v[0],
-                                    source_type=v[1]))
+    [v.append(parse_value(driver=driver,
+                          css_selector=v[0],
+                          source_type=v[1]))
      for (k,v) in css_selector_info.items()]
     return css_selector_info
 
