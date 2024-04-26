@@ -33,6 +33,7 @@ def parse_value(driver,
                 css_selector: str,
                 source_type: int = 0,
                 separator: str = ", ",
+                need_replace_newline: int = 0,
                 timeout: int = 3):
     print(css_selector)
     try:
@@ -57,8 +58,9 @@ def parse_value(driver,
         return res
 
     found_elem_text = found_element.text
+    if "\n" in found_elem_text and need_replace_newline == 1:
+        return found_elem_text.replace("\n", separator)
     return refine_str(found_elem_text)
-    # return found_elem_text.replace("\n", ", ")
 
 
 def get_bg_content(driver, css_selector_info: dict):
@@ -66,7 +68,8 @@ def get_bg_content(driver, css_selector_info: dict):
         raise ValueError("Неверный тип переданного аргумента <css_selector_info>!")
     [v.append(parse_value(driver=driver,
                           css_selector=v[0],
-                          source_type=v[1]))
+                          source_type=v[1],
+                          need_replace_newline=v[2]))
      for (k,v) in css_selector_info.items()]
     return css_selector_info
 
