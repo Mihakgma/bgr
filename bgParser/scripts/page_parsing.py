@@ -18,24 +18,35 @@ def refine_str(text: str, seps: str=', '):
 
 
 def get_element_attribute(driver,
-                     css_selector: str,
-                     get_href: int = 0,
-                     timeout: int = 3):
+                          css_selector: str,
+                          source_type: int = 0,
+                          separator: str = ", ",
+                          timeout: int = 3):
+    print(css_selector)
     try:
         element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         WebDriverWait(driver, timeout).until(element_present)
     except TimeoutException or NoSuchElementException:
         print("Timed out waiting for page to load")
         return ""
+
     found_element = driver.find_element(By.CSS_SELECTOR, css_selector)
-    found_elem_text = found_element.text
-    if get_href:
+    if source_type == 1:  # get_attribute('href')
         try:
             found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
-            return ", ".join([i.get_attribute('href') for i in found_elements])
+            return separator.join([i.get_attribute('href') for i in found_elements])
         except BaseException as e:
             print(f'Возникла ошибка <{e}>')
             return ""
+    elif source_type == 2:  # get_attribute('src')
+        try:
+            found_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+            return separator.join([i.get_attribute('src') for i in found_elements])
+        except BaseException as e:
+            print(f'Возникла ошибка <{e}>')
+            return ""
+
+    found_elem_text = found_element.text
     return refine_str(found_elem_text)
     # return found_elem_text.replace("\n", ", ")
 
@@ -45,7 +56,7 @@ def get_bg_content(driver, css_selector_info: dict):
         raise ValueError("Неверный тип переданного аргумента <css_selector_info>!")
     [v.append(get_element_attribute(driver=driver,
                                     css_selector=v[0],
-                                    get_href=v[1]))
+                                    source_type=v[1]))
      for (k,v) in css_selector_info.items()]
     return css_selector_info
 
@@ -59,6 +70,7 @@ if __name__ == '__main__':
     # print(json_data)
 
     start_html = "https://hobbyworld.ru/kragmorta"
+    # start_html = "https://hobbyworld.ru/catan-kupci-i-varvari"
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
         driver.get(start_html)
         result = get_bg_content(driver=driver, css_selector_info=json_data)
