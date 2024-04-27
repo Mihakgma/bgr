@@ -101,25 +101,16 @@ def get_bg_content(driver,
     return result_dict
 
 
-if __name__ == '__main__':
-    # объявление переменных
-    css_selector_filename = "..\\resources\\bg_parsing_info.json"
-    start_htmls = [
-        "https://hobbyworld.ru/kragmorta",
-        "https://hobbyworld.ru/catan-kupci-i-varvari",
-        "https://hobbyworld.ru/catan-kupci-i-varvari",
-        "https://hobbyworld.ru/catan-kupci-i-varvari"
-    ]
-    res_dict_path = "..\\output\\test_parsed_pages.json"
-
+def main_func(css_selector_filename,
+                  start_htmls,
+                  res_dict_path,
+                  show_parsed_data: bool=False):
+    if type(show_parsed_data) != bool:
+        raise TypeError("Ошибочный тип данных для аргумента <show_parsed_data>")
     # подгружаем json с данными о CSS-Selectors
     with open(css_selector_filename) as json_file:
         json_data = json_load(json_file)
-    print(type(json_data))
-    # print(json_data)
-
-    # start_html = "https://hobbyworld.ru/kragmorta"
-    # start_html = "https://hobbyworld.ru/catan-kupci-i-varvari"
+    # print(type(json_data))
 
     test_dict = {}
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
@@ -131,9 +122,25 @@ if __name__ == '__main__':
                                     css_selector_info=json_data,
                                     result_dict=test_dict)
     # Selenium-browser has been closed
-    # смотрим полученный результат
-    print(*[(k, *[(col, val) for (col, val) in v.items()])
-            for (k, v) in test_dict.items()], sep="\n")
+    if show_parsed_data:
+        # смотрим полученный результат
+        print(*[(k, *[(col, val) for (col, val) in v.items()])
+                for (k, v) in test_dict.items()], sep="\n")
 
     with open(res_dict_path, "w") as jsonFile:
         json_dump(test_dict, jsonFile)
+
+
+if __name__ == '__main__':
+    # объявление переменных
+    css_selector_filename = "..\\resources\\bg_parsing_info.json"
+    start_htmls = [
+        "https://hobbyworld.ru/kragmorta",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari"
+    ]
+    res_dict_path = "..\\output\\test_parsed_pages.json"
+    main_func(css_selector_filename,
+              start_htmls,
+              res_dict_path)
