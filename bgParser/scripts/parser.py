@@ -82,13 +82,13 @@ class WebParser:
                               key_ldf=self.get_last_downloaded_htmls_key(),
                               value=filename_new)
 
-    def get_now_timestamp(self, underspaces: bool=True):
-        if type(underspaces) != bool:
+    def get_now_timestamp(self, need_underspaces: bool=True):
+        if type(need_underspaces) != bool:
             raise TypeError("Передан неверный аргумент!")
         now = datetime.now()
 
         time = now.strftime("%d:%m:%Y:%H:%M")
-        return [time, time.replace(":", "_")][underspaces]
+        return [time, time.replace(":", "_")][need_underspaces]
 
     @staticmethod
     def update_info_dict(dict_path,
