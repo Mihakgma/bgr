@@ -78,7 +78,9 @@ class WebParser:
         with open(filename_new, 'w') as f:
             for line in lst:
                 f.write(f"{line}\n")
-        self.update_info_dict(value=filename_new)
+        self.update_info_dict(dict_path=self.get_names_dict_path(),
+                              key_ldf=self.get_last_downloaded_htmls_key(),
+                              value=filename_new)
 
     def get_now_timestamp(self, underspaces: bool=True):
         if type(underspaces) != bool:
@@ -88,13 +90,19 @@ class WebParser:
         time = now.strftime("%d:%m:%Y:%H:%M")
         return [time, time.replace(":", "_")][underspaces]
 
-    def update_info_dict(self, value, append_to_lst=False):
-        dict_path = self.get_names_dict_path()
-        key_ldf = self.get_last_downloaded_htmls_key()
+    @staticmethod
+    def update_info_dict(dict_path,
+                         key_ldf,
+                         value,
+                         append_to_lst=False):
+        if type(append_to_lst) != bool:
+            raise TypeError("Variable <append_to_lst> need to be bool type!")
         with open(dict_path) as json_file:
             json_data: dict = json_load(json_file)
         if append_to_lst:
-            pass
+            if type(json_data[key_ldf]) != list:
+                raise TypeError(f"Value for key <{key_ldf}> is not a list!")
+            json_data[key_ldf].append(value)
         else:
             json_data[key_ldf] = value
         with open(dict_path, "w") as jsonFile:
