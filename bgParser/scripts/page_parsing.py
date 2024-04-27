@@ -94,7 +94,7 @@ def get_bg_content(driver,
             result_dict[url]["duplicates"] = 0
             result_dict[url]["error"] = ""
         except BaseException as e:
-            error_txt = f"{k}_{v}_{e}"
+            error_txt = f"{v}_{e}"
             result_dict[url]["error"] = error_txt
     elif url in result_dict:
         result_dict[url]["duplicates"] += 1
@@ -102,8 +102,17 @@ def get_bg_content(driver,
 
 
 if __name__ == '__main__':
-    # подгружаем json с данными о CSS-Selectors
+    # объявление переменных
     css_selector_filename = "..\\resources\\bg_parsing_info.json"
+    start_htmls = [
+        "https://hobbyworld.ru/kragmorta",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/catan-kupci-i-varvari"
+    ]
+    res_dict_path = "..\\output\\test_parsed_pages.json"
+
+    # подгружаем json с данными о CSS-Selectors
     with open(css_selector_filename) as json_file:
         json_data = json_load(json_file)
     print(type(json_data))
@@ -111,12 +120,7 @@ if __name__ == '__main__':
 
     # start_html = "https://hobbyworld.ru/kragmorta"
     # start_html = "https://hobbyworld.ru/catan-kupci-i-varvari"
-    start_htmls = [
-        "https://hobbyworld.ru/kragmorta",
-        "https://hobbyworld.ru/catan-kupci-i-varvari",
-        "https://hobbyworld.ru/catan-kupci-i-varvari",
-        "https://hobbyworld.ru/catan-kupci-i-varvari"
-    ]
+
     test_dict = {}
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
         for html in tqdm(start_htmls):
@@ -131,6 +135,5 @@ if __name__ == '__main__':
     print(*[(k, *[(col, val) for (col, val) in v.items()])
             for (k, v) in test_dict.items()], sep="\n")
 
-    res_dict_path = "..\\output\\test_parsed_pages.json"
     with open(res_dict_path, "w") as jsonFile:
         json_dump(test_dict, jsonFile)
