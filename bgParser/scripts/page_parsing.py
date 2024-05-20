@@ -1,15 +1,14 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromiumService
-
-from json import load as json_load
 from json import dump as json_dump
+from json import load as json_load
 
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from tqdm.notebook import tqdm
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def get_elements_attribute(driver,
@@ -162,6 +161,7 @@ if __name__ == '__main__':
     css_selector_filename = "..\\resources\\bg_parsing_info.json"
     start_htmls = [
         "https://hobbyworld.ru/kragmorta",
+        "https: // hobbyworld.ru / mir - fantastiki - 245",
         "https://hobbyworld.ru/cat",  # порченый урл!!!
         "https://hobbyworld.ru/catan-kupci-i-varvari",
         "https://hobbyworld.ru/catan-kupci-i-varvari"
