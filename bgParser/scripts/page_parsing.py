@@ -108,7 +108,7 @@ def main_func(css_selector_filename,
                   start_htmls,
                   res_dict_path,
                   show_parsed_data: bool=False,
-                  access_error_limit: int = 5):
+                  access_error_limit: int = 12):
     if type(show_parsed_data) != bool:
         raise TypeError("Ошибочный тип данных для аргумента <show_parsed_data>")
     if type(access_error_limit) != int:
@@ -117,8 +117,9 @@ def main_func(css_selector_filename,
     with open(css_selector_filename) as json_file:
         json_data = json_load(json_file)
     # print(type(json_data))
-
-    test_dict = {}
+    with open(res_dict_path) as json_file:
+        test_dict = json_load(json_file)
+    # test_dict = {}
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
         errors_in_row = []
         error_counter = 0
