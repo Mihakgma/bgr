@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -83,19 +83,23 @@ def get_bg_content(driver,
     # url = driver.current_url
     if url not in result_dict:
         result_dict[url] = {}
-        try:
-            for (k, v) in css_selector_info.items():
-                curr_value = parse_value(driver=driver,
-                                         css_selector=v[0],
-                                         source_type=v[1],
-                                         need_replace_newline=v[2])
-                result_dict[url][k] = curr_value
-            result_dict[url]["parsed_ok"] = 1
-            result_dict[url]["duplicates"] = 0
-            result_dict[url]["error"] = ""
-        except BaseException as e:
-            error_txt = f"{v}_{e}"
-            result_dict[url]["error"] = error_txt
+        page_not_found_error = "Запрашиваемая страница не найдена"
+        if page_not_found_error in driver.page_source:
+            result_dict[url]["error"] = page_not_found_error
+        else:  # запрашиваемая страница существует
+            try:
+                for (k, v) in css_selector_info.items():
+                    curr_value = parse_value(driver=driver,
+                                             css_selector=v[0],
+                                             source_type=v[1],
+                                             need_replace_newline=v[2])
+                    result_dict[url][k] = curr_value
+                result_dict[url]["parsed_ok"] = 1
+                result_dict[url]["duplicates"] = 0
+                result_dict[url]["error"] = ""
+            except BaseException as e:
+                error_txt = f"{v}_{e}"
+                result_dict[url]["error"] = error_txt
     elif url in result_dict:
         result_dict[url]["duplicates"] += 1
     return result_dict
@@ -104,9 +108,12 @@ def get_bg_content(driver,
 def main_func(css_selector_filename,
                   start_htmls,
                   res_dict_path,
-                  show_parsed_data: bool=False):
+                  show_parsed_data: bool=False,
+                  access_error_limit: int = 5):
     if type(show_parsed_data) != bool:
         raise TypeError("Ошибочный тип данных для аргумента <show_parsed_data>")
+    if type(access_error_limit) != int:
+        raise TypeError("Ограничитель количества ошибок парсинга <access_error_limit> должен быть целым числом!")
     # подгружаем json с данными о CSS-Selectors
     with open(css_selector_filename) as json_file:
         json_data = json_load(json_file)
@@ -114,13 +121,32 @@ def main_func(css_selector_filename,
 
     test_dict = {}
     with webdriver.Chrome(service=ChromiumService(ChromeDriverManager().install())) as driver:
+        errors_in_row = []
+        error_counter = 0
         for html in tqdm(start_htmls):
-            if html not in test_dict:
-                driver.get(html)
-            test_dict = get_bg_content(driver=driver,
-                                    url=html,
-                                    css_selector_info=json_data,
-                                    result_dict=test_dict)
+            if access_error_limit == error_counter:
+                print(f"Процесс парсинга прерван из-за достижения лимита <{access_error_limit}> на НЕПРЕРЫВНЫЕ ОШИБКИ")
+                break
+            try:
+                if html not in test_dict:
+                    driver.get(html)
+                test_dict = get_bg_content(driver=driver,
+                                           url=html,
+                                           css_selector_info=json_data,
+                                           result_dict=test_dict)
+                if error_counter != 0:
+                    errors_in_row.append(error_counter)
+                    error_counter = 0
+            except BaseException or WebDriverException:
+                error_counter += 1
+                answer = input('Для отмены процесса парсинга нажмите х или Х')
+                answer = answer.lower().strip()
+                if 'x' in answer or 'х' in answer:
+                    break
+    errors_in_row.append(error_counter)
+    print(f"В ходе парсинга последнее количество подряд следующих ошибок составило: <{error_counter}>")
+    print(f"В ходе парсинга наибольшее количество подряд следующих ошибок составило: <{max(errors_in_row)}>")
+    print(f"В ходе парсинга количество ошибочных эпизодов составило: <{len(errors_in_row)}>")
     # Selenium-browser has been closed
     if show_parsed_data:
         # смотрим полученный результат
@@ -136,7 +162,7 @@ if __name__ == '__main__':
     css_selector_filename = "..\\resources\\bg_parsing_info.json"
     start_htmls = [
         "https://hobbyworld.ru/kragmorta",
-        "https://hobbyworld.ru/catan-kupci-i-varvari",
+        "https://hobbyworld.ru/cat",  # порченый урл!!!
         "https://hobbyworld.ru/catan-kupci-i-varvari",
         "https://hobbyworld.ru/catan-kupci-i-varvari"
     ]
