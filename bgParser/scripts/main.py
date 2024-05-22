@@ -12,7 +12,7 @@ if __name__ == '__main__':
     start_htmls_filename = json_data["last_downloaded_htmls"]
     with open(start_htmls_filename) as file:
         start_htmls = [line.rstrip() for line in file]
-    res_dict_path = "..\\output\\many_parsed_pages.json"
+    res_dict_path = "..\\output\\parsed_board_games.json"
     main_func(css_selector_filename,
               start_htmls,
               res_dict_path)

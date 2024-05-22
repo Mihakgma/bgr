@@ -80,7 +80,7 @@ def get_bg_content(driver,
         raise ValueError("Неверный тип переданного аргумента <css_selector_info>!")
 
     # url = driver.current_url
-    if url not in result_dict:
+    if url not in result_dict or len(result_dict[url]) == 0:
         result_dict[url] = {}
         page_not_found_error = "Запрашиваемая страница не найдена"
         if page_not_found_error in driver.page_source:
